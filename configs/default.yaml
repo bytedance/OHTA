@@ -1,0 +1,140 @@
+category: 'ohta'
+
+
+##############################################3
+## Network Specs
+
+# modules
+network_module: 'core.nets.ohta.network'
+trainer_module: 'core.train.trainers.ohta.trainer'
+lr_updater_module: 'core.train.trainers.ohta.lr_updaters.exp_decay'
+optimizer_module: 'core.train.optimizers.ohta.optimizer'
+
+# positional embedder -- canonical mlp
+embedder:
+  module: "core.nets.ohta.embedders.fourier"
+
+# positional embedder -- non-rigid motion mlp
+non_rigid_embedder:
+  module: "core.nets.ohta.embedders.hannw_fourier"
+
+
+##############################################3
+## Data Configuration
+
+train_keyfilter: ['rays',
+                  'motion_bases', 'motion_weights_priors',
+                  'cnl_bbox', 'dst_posevec_69', 'uv']
+test_keyfilter: ['rays', 'target_rgbs', 
+                 'motion_bases', 'motion_weights_priors',
+                  'cnl_bbox', 'dst_posevec_69', 'uv']
+interhand:
+  fps: 5
+  handtype: 'right'
+
+train:
+  perturb: 1.        # only for training, set to 0. for no jitter, 1. for jitter
+  batch_size: 1
+  shuffle: True
+  drop_last: False
+  num_workers: 4
+  maxiter: 400000
+  maxepoch: 800
+  lr: 0.0005  # 5e-4
+  lr_mweight_vol_decoder: 0.00005 # 5e-5
+  lr_pose_decoder: 0.00005        # 5e-5
+  lr_non_rigid_mlp: 0.00005       # 5e-5
+  lrate_decay: 500000
+  lr_decay_rate: 0.1
+  optimizer: 'adam'
+  log_interval: 100
+  save_checkpt_interval: 10000
+  save_model_interval: 10000
+  ray_shoot_mode: 'patch'
+
+
+
+progress:
+  batch_size: 1
+  shuffle: False
+  drop_last: False
+  num_workers: 4
+  dump_interval: 5000
+
+infer:
+  batch_size: 1
+  shuffle: False
+  drop_last: False
+  num_workers: 0
+
+movement:
+  batch_size: 1
+  shuffle: False
+  drop_last: False
+  num_workers: 0
+
+freeview:
+  batch_size: 1
+  shuffle: False
+  drop_last: False
+  num_workers: 0
+  frame_idx: 128
+  axis: 'y'
+
+tpose:
+  batch_size: 1
+  shuffle: False
+  num_workers: 0
+  drop_last: False
+
+freepose:
+  batch_size: 1
+  shuffle: False
+  num_workers: 0
+  drop_last: False
+  axis: 'x'
+  joint_rot: [[0, 0, 0],
+              [[0, 90], 0, 0],
+              [[0, 80], 0, 0],
+              [[0, 80], 0, 0],
+              [[0, 100], 0, 0],
+              [[0, 80], 0, 0],
+              [[0, 80], 0, 0],
+              [[0, 90], 0, 0],
+              [[0, 80], 0, 0],
+              [[0, 80], 0, 0],
+              [[0, 90], 0, 0],
+              [[0, 80], [0, 10], 0],
+              [[0, 80], 0, 0],
+              [0, 0, [0, 50]],
+              [0, [0, 20], 0],
+              [[0, 90], 0, 0]]
+
+##############################################3
+## Misc
+
+sex: 'neutral'
+total_bones: 24
+bbox_offset: 0.3
+
+load_net: latest
+save_all: True    # save all checkpoints
+
+patch:
+  sample_subject_ratio: 0.8
+  N_patches: 6
+  size: 32      # [Patch] size of patch
+
+N_samples: 128      # number of samples for each ray in coarse ray matching
+
+perturb: 1.        # only for training, set to 0. for no jitter, 1. for jitter
+
+netchunk_per_gpu: 300000 # number of pts sent through network in parallel, decrease if running out of memory
+chunk: 32768   # 32768=1024*32, number of rays processed in parallel, decrease if running out of memory
+n_gpus: 1
+
+show_alpha: False  
+show_truth: False
+
+run_geo: False
+bgcolor: [0., 0., 0.]
